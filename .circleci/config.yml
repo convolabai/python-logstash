@@ -20,7 +20,7 @@ jobs:
                       echo 'export CIRCLE_TAG="$CIRCLE_TAG"' >> $BASH_ENV
                       if [ -z $CIRCLE_TAG ]
                       then
-                        echo 'export VERSION="$CIRCLE_BRANCH-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
+                        echo 'export VERSION="$CIRCLE_BRANCH-build_$CIRCLE_BUILD_NUM"' >> $BASH_ENV
                       else
                         echo 'export VERSION="$CIRCLE_TAG"' >> $BASH_ENV
                       fi
