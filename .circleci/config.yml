@@ -60,3 +60,15 @@ jobs:
                   docker inspect -f {{.State.Running}} logstash
                   docker inspect -f {{.State.ExitCode}} logstash
                   docker exec logstash true
+version: 2.1
+workflows:
+  version: 2
+  build_app:
+      jobs:
+        - build_app:
+            filters:
+              tags:
+                ignore: /^rebuild.*/
+              branches:
+                ignore:
+                  - master
