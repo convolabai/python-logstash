@@ -49,6 +49,9 @@ RUN apk add --no-cache -t .build-deps wget ca-certificates gnupg openssl \
 
 RUN apk add --no-cache libc6-compat
 
+# install build-tools
+RUN apk add --update gcc g++
+
 # install openssl
 RUN apk add --update openssl && \
     rm -rf /var/cache/apk/*

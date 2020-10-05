@@ -1,5 +1,11 @@
 # requirements.txt file
-# numpy
+# numpy==1.14.3
+# pandas==0.25.3
+# matplotlib==3.3.0
+# scikit-learn==0.23.1
+# scipy==1.5.2
+# spacy==2.1.9
+
 atomicwrites==1.4.0
 attrs==19.3.0
 autoit==0.1
@@ -104,7 +110,7 @@ threadpoolctl==2.1.0
 toml==0.10.1
 tqdm==4.11.2
 urllib3==1.25.9
-# wasabi==0.7.0
-# Werkzeug==1.0.1
-# xlib==0.21
-# zipp==3.1.0
+wasabi==0.7.0
+Werkzeug==1.0.1
+xlib==0.21
+zipp==3.1.0
