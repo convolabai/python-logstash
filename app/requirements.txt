@@ -10,7 +10,7 @@ boto3==1.15.11
 botocore==1.18.11
 joblib==1.0.0
 numpy
-scikit-learn==0.24.1
+# scikit-learn==0.24.1
 scipy==1.6.0
 sklearn==0.0
 threadpoolctl==2.1.0
