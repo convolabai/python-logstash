@@ -83,6 +83,9 @@ RUN chown --recursive logstash:root config/ pipeline/
 # Copy Python App folder
 COPY app /app
 WORKDIR /app
+RUN python -m venv env
+RUN source env/bin/activate
+RUN pip install -U pip
 RUN pip install -r requirements.txt
 RUN chown --recursive logstash:root .
 
