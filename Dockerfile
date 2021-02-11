@@ -84,13 +84,12 @@ RUN chown --recursive logstash:root config/ pipeline/
 COPY app /app
 WORKDIR /app
 RUN python -m venv env
-RUN source env/bin/activate
-RUN pip install -U pip
-RUN pip install -r requirements.txt
+RUN env/bin/pip install -U pip
+RUN env/bin/pip install -r requirements.txt
 RUN chown --recursive logstash:root .
 
 USER 1000
 
 EXPOSE 9600 5044 8080 8089
 
-CMD ["python", "-u", "/app/app.py"]
+CMD ["env/bin/python", "-u", "/app/app.py"]
