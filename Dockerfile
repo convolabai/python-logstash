@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.8-slim
 
 RUN echo "Check python version"
 RUN python --version
@@ -83,14 +83,12 @@ RUN chown --recursive logstash:root config/ pipeline/
 # Copy Python App folder
 COPY app /app
 WORKDIR /app
-RUN which python
-RUN python3 -m venv env
-RUN env/bin/pip install -U pip
-RUN env/bin/pip install -r requirements.txt
+RUN pip install -U pip
+RUN pip install -r requirements.txt
 RUN chown --recursive logstash:root .
 
 USER 1000
 
 EXPOSE 9600 5044 8080 8089
 
-CMD ["env/bin/python", "-u", "/app/app.py"]
+CMD ["python", "-u", "/app/app.py"]
