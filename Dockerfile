@@ -7,6 +7,7 @@ RUN python --version
 # RUN apk add --no-cache openjdk8-jre su-exec
 # RUN apt update && apt install -y software-properties-common
 # RUN add-apt-repository ppa:openjdk-r/ppa
+RUN apt update
 RUN apt install -y wget gnupg software-properties-common
 RUN wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
 RUN add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
