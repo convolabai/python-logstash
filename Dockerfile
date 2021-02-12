@@ -5,10 +5,13 @@ RUN python --version
 
 # install open-jre
 # RUN apk add --no-cache openjdk8-jre su-exec
-# RUN apt-get update && apt-get install -y software-properties-common
+# RUN apt update && apt install -y software-properties-common
 # RUN add-apt-repository ppa:openjdk-r/ppa
-RUN apt-get update && apt-get install -y \
-    openjdk-8-jdk
+RUN apt install -y wget gnupg software-properties-common
+RUN wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
+RUN add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
+RUN apt update && apt install -y adoptopenjdk-8-hotspot
+RUN java --version
 
 ENV VERSION 7.6.2
 ENV DOWNLOAD_URL https://artifacts.elastic.co/downloads/logstash
@@ -24,11 +27,11 @@ RUN addgroup --gid 1000 logstash && \
   logstash
 
 # RUN apk add --no-cache libzmq bash
-RUN apt-get install -y \
+RUN apt install -y \
     libzmq \
     bash
 # RUN apk add --no-cache -t .build-deps wget ca-certificates gnupg openssl \
-RUN apt-get install -y wget ca-certificates gnupg openssl \
+RUN apt install -y wget ca-certificates gnupg openssl \
   && set -ex \
   && cd /tmp \
   && wget --progress=bar:force -O logstash.tar.gz "$TARBALL"; \
@@ -53,26 +56,26 @@ RUN apt-get install -y wget ca-certificates gnupg openssl \
   && find /usr/share/logstash -type d -exec chmod g+s {} \; \
   && ln -s /usr/share/logstash /opt/logstash \
   && rm -rf /tmp/* \
-  && apt-get purge wget ca-certificates gnupg openssl
+  && apt purge wget ca-certificates gnupg openssl
 
 # RUN apk add --no-cache libc6-compat
-RUN apt-get install -y libc6-compat
+RUN apt install -y libc6-compat
 
 # install build-tools
 # RUN apk add --update gcc g++
-RUN apt-get -y update && apt-get -y install gcc g++
+RUN apt -y update && apt -y install gcc g++
 
 # install openssl
 # RUN apk add --update openssl && \
 #     rm -rf /var/cache/apk/*
 
-RUN apt-get install -y \
+RUN apt install -y \
     openssl \
  && rm -rf /var/lib/apt/lists/*
 
 # install curl
 # RUN apk --no-cache add curl
-RUN apt-get install -y curl
+RUN apt install -y curl
 
 ENV PATH /usr/share/logstash/bin:/sbin:$PATH
 ENV LS_SETTINGS_DIR /usr/share/logstash/config
