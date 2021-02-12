@@ -1,25 +1,36 @@
-FROM python:3.8-slim-buster
+FROM python:3.8-slim
 
 RUN echo "Check python version"
 RUN python --version
 
-# install open-jre
-# RUN apk add --no-cache openjdk8-jre su-exec
-# RUN apt update && apt install -y software-properties-common
-# RUN add-apt-repository ppa:openjdk-r/ppa
-RUN apt update
-RUN apt install -y wget gnupg software-properties-common
-RUN wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
-RUN add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
-RUN apt update && apt install -y adoptopenjdk-8-hotspot
-RUN java --version
+# Install OS packages
+RUN apt-get update && apt-get -y upgrade
+  
+WORKDIR /opt
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        wget \
+        curl \
+        gnupg \
+        openssl \
+        bash \
+    && curl \
+        -L \
+        -o openjdk.tar.gz \
+        https://download.java.net/java/GA/jdk11/13/GPL/openjdk-11.0.1_linux-x64_bin.tar.gz \
+    && mkdir jdk \
+    && tar zxf openjdk.tar.gz -C jdk --strip-components=1 \
+    && rm -rf openjdk.tar.gz \
+    && apt-get -y --purge autoremove curl \
+    && ln -sf /opt/jdk/bin/* /usr/local/bin/ \
+    && rm -rf /var/lib/apt/lists/* \
+    && java  --version \
+    && javac --version \
+    && jlink --version
 
+# Set Logstash Version
 ENV VERSION 7.6.2
-ENV DOWNLOAD_URL https://artifacts.elastic.co/downloads/logstash
-ENV TARBALL "${DOWNLOAD_URL}/logstash-oss-${VERSION}.tar.gz"
-ENV TARBALL_ASC "${DOWNLOAD_URL}/logstash-oss-${VERSION}.tar.gz.asc"
-ENV TARBALL_SHA "c425a9748964ef38fc58f67778cd88fc367df91087362353cfee316e54528e4a23407e1fc53d628008fd4c829b427061758112f10e7805cec88c0a1f0a966d2a"
-ENV GPG_KEY "46095ACC8548582C1A2699A9D27D666CD88E42B4"
 
 # Provide a non-root user to run the process.
 RUN addgroup --gid 1000 logstash && \
@@ -27,56 +38,9 @@ RUN addgroup --gid 1000 logstash && \
   -h /usr/share/logstash -H -D \
   logstash
 
-# RUN apk add --no-cache libzmq bash
-RUN apt install -y \
-    libzmq \
-    bash
-# RUN apk add --no-cache -t .build-deps wget ca-certificates gnupg openssl \
-RUN apt install -y wget ca-certificates gnupg openssl \
-  && set -ex \
-  && cd /tmp \
-  && wget --progress=bar:force -O logstash.tar.gz "$TARBALL"; \
-  if [ "$TARBALL_SHA" ]; then \
-  echo "$TARBALL_SHA *logstash.tar.gz" | sha512sum -c -; \
-  fi; \
-  \
-  if [ "$TARBALL_ASC" ]; then \
-  wget --progress=bar:force -O logstash.tar.gz.asc "$TARBALL_ASC"; \
-  export GNUPGHOME="$(mktemp -d)"; \
-  ( gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$GPG_KEY" \
-  || gpg --keyserver pgp.mit.edu --recv-keys "$GPG_KEY" \
-  || gpg --keyserver keyserver.pgp.com --recv-keys "$GPG_KEY" ); \
-  gpg --batch --verify logstash.tar.gz.asc logstash.tar.gz; \
-  rm -rf "$GNUPGHOME" logstash.tar.gz.asc || true; \
-  fi; \
-  tar -xzf logstash.tar.gz \
-  && mv logstash-$VERSION /usr/share/logstash \
-  && chown --recursive logstash:logstash /usr/share/logstash/ \
-  && chown -R logstash:root /usr/share/logstash \
-  && chmod -R g=u /usr/share/logstash \
-  && find /usr/share/logstash -type d -exec chmod g+s {} \; \
-  && ln -s /usr/share/logstash /opt/logstash \
-  && rm -rf /tmp/* \
-  && apt purge wget ca-certificates gnupg openssl
-
-# RUN apk add --no-cache libc6-compat
-RUN apt install -y libc6-compat
-
-# install build-tools
-# RUN apk add --update gcc g++
-RUN apt -y update && apt -y install gcc g++
-
-# install openssl
-# RUN apk add --update openssl && \
-#     rm -rf /var/cache/apk/*
-
-RUN apt install -y \
-    openssl \
- && rm -rf /var/lib/apt/lists/*
-
-# install curl
-# RUN apk --no-cache add curl
-RUN apt install -y curl
+# Install Logstash
+RUN wget https://artifacts.elastic.co/downloads/logstash/logstash-${VERSION}.deb
+RUN dpkg -i logstash-${VERSION}.deb
 
 ENV PATH /usr/share/logstash/bin:/sbin:$PATH
 ENV LS_SETTINGS_DIR /usr/share/logstash/config
@@ -88,13 +52,14 @@ RUN set -ex; \
   truncate -s 0 "$LS_SETTINGS_DIR/log4j2.properties"; \
   fi
 
-# Install & Verify logstash plugins
+# Install & Verify Logstash plugins
 RUN logstash-plugin install logstash-codec-csv
 RUN logstash-plugin list
 
+# Copy Logstash pre-config folder
+
 WORKDIR /usr/share/logstash
 
-# Copy Logstash pre-config folder
 COPY config/logstash /usr/share/logstash/config/
 COPY config/pipeline/default.conf /usr/share/logstash/pipeline/logstash.conf
 RUN chown --recursive logstash:root config/ pipeline/
@@ -102,7 +67,6 @@ RUN chown --recursive logstash:root config/ pipeline/
 # Copy Python App folder
 COPY app /app
 WORKDIR /app
-RUN pip install -U pip
 RUN pip install -r requirements.txt
 RUN chown --recursive logstash:root .
 
