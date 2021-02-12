@@ -1,10 +1,12 @@
-FROM python:3.8-alpine
+FROM python:3.8-slim
 
 RUN echo "Check python version"
 RUN python --version
 
 # install open-jre
-RUN apk add --no-cache openjdk8-jre su-exec
+# RUN apk add --no-cache openjdk8-jre su-exec
+RUN apt-get install -y \
+    openjdk-8-jdk
 
 ENV VERSION 7.6.2
 ENV DOWNLOAD_URL https://artifacts.elastic.co/downloads/logstash
@@ -19,8 +21,12 @@ RUN addgroup --gid 1000 logstash && \
   -h /usr/share/logstash -H -D \
   logstash
 
-RUN apk add --no-cache libzmq bash
-RUN apk add --no-cache -t .build-deps wget ca-certificates gnupg openssl \
+# RUN apk add --no-cache libzmq bash
+RUN apt-get install -y \
+    libzmq \
+    bash
+# RUN apk add --no-cache -t .build-deps wget ca-certificates gnupg openssl \
+RUN apt-get install -y wget ca-certificates gnupg openssl \
   && set -ex \
   && cd /tmp \
   && wget --progress=bar:force -O logstash.tar.gz "$TARBALL"; \
@@ -45,19 +51,26 @@ RUN apk add --no-cache -t .build-deps wget ca-certificates gnupg openssl \
   && find /usr/share/logstash -type d -exec chmod g+s {} \; \
   && ln -s /usr/share/logstash /opt/logstash \
   && rm -rf /tmp/* \
-  && apk del --purge .build-deps
+  && apt-get purge wget ca-certificates gnupg openssl
 
-RUN apk add --no-cache libc6-compat
+# RUN apk add --no-cache libc6-compat
+RUN apt-get install -y libc6-compat
 
 # install build-tools
-RUN apk add --update gcc g++
+# RUN apk add --update gcc g++
+RUN apt-get -y update && apt-get -y install gcc g++
 
 # install openssl
-RUN apk add --update openssl && \
-    rm -rf /var/cache/apk/*
+# RUN apk add --update openssl && \
+#     rm -rf /var/cache/apk/*
+
+RUN apt-get install -y \
+    openssl \
+ && rm -rf /var/lib/apt/lists/*
 
 # install curl
-RUN apk --no-cache add curl
+# RUN apk --no-cache add curl
+RUN apt-get install -y curl
 
 ENV PATH /usr/share/logstash/bin:/sbin:$PATH
 ENV LS_SETTINGS_DIR /usr/share/logstash/config
