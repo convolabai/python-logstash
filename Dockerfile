@@ -70,6 +70,7 @@ COPY app /app
 WORKDIR /app
 RUN pip install -r requirements.txt
 RUN chown --recursive logstash:root .
+RUN chmod 777 /opt/logstash/pipeline
 
 USER 1000
 
