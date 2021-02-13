@@ -62,14 +62,14 @@ WORKDIR /usr/share/logstash
 
 COPY config/logstash /usr/share/logstash/config/
 COPY config/pipeline/default.conf /usr/share/logstash/pipeline/logstash.conf
-RUN chown --recursive logstash:root config/ pipeline/
+RUN chown --recursive logstash:root config/ pipeline/ data/
+RUN ln -s /usr/share/logstash /opt/logstash
 
 # Copy Python App folder
 COPY app /app
 WORKDIR /app
 RUN pip install -r requirements.txt
 RUN chown --recursive logstash:root .
-RUN chmod 777 /usr/share/logstash/data
 
 USER 1000
 
