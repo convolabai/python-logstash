@@ -15,6 +15,7 @@ RUN apt-get update \
         gnupg \
         openssl \
         bash \
+        vim \
     && curl \
         -L \
         -o openjdk.tar.gz \
