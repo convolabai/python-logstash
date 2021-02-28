@@ -73,7 +73,7 @@ RUN pip install -r requirements.txt
 RUN chown --recursive logstash:root .
 RUN chmod 777 /opt/logstash/pipeline
 
-USER 1000
+USER logstash
 
 EXPOSE 9600 5044 8080 8089
 
