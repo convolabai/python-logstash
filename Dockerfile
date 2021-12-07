@@ -56,6 +56,9 @@ RUN apk add --update gcc g++
 RUN apk add --update openssl && \
     rm -rf /var/cache/apk/*
 
+RUN apk add --update gnupg && \
+    apk add rng-tools
+
 # install curl
 RUN apk --no-cache add curl
 
