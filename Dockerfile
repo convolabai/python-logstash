@@ -59,6 +59,7 @@ RUN apk add --update openssl && \
 # install gnupg
 RUN apk add --update gnupg && \
     apk add rng-tools
+RUN export GPG_TTY=$(tty)
 
 # install curl
 RUN apk --no-cache add curl
